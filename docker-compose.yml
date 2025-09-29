@@ -1,19 +1,4 @@
 services:
-  db:
-    image: postgis/postgis:15-3.3
-    environment:
-      POSTGRES_DB: health_surveillance
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   redis:
     image: redis:7-alpine
@@ -40,11 +25,7 @@ services:
       SECRET_KEY: django-insecure-change-this-in-production-very-long-random-string-here
       DEBUG: "True"
       DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,192.168.1.5,0.0.0.0"
-      DB_NAME: health_surveillance
-      DB_USER: postgres
-      DB_PASSWORD: password
-      DB_HOST: db
-      DB_PORT: "5432"
+      SPATIALITE_LIBRARY_PATH: mod_spatialite
       REDIS_URL: redis://redis:6379/0
       EMAIL_HOST: smtp.gmail.com
       EMAIL_PORT: "587"
@@ -54,8 +35,6 @@ services:
       TWILIO_AUTH_TOKEN: 6ea6b18f18c43747b6630ea334d81c13
       TWILIO_PHONE_NUMBER: "+16812026553"
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -73,11 +52,7 @@ services:
       SECRET_KEY: django-insecure-change-this-in-production-very-long-random-string-here
       DEBUG: "True"
       DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,192.168.1.5,0.0.0.0"
-      DB_NAME: health_surveillance
-      DB_USER: postgres
-      DB_PASSWORD: password
-      DB_HOST: db
-      DB_PORT: "5432"
+      SPATIALITE_LIBRARY_PATH: mod_spatialite
       REDIS_URL: redis://redis:6379/0
       EMAIL_HOST: smtp.gmail.com
       EMAIL_PORT: "587"
@@ -87,7 +62,6 @@ services:
       TWILIO_AUTH_TOKEN: 6ea6b18f18c43747b6630ea334d81c13
       TWILIO_PHONE_NUMBER: "+16812026553"
     depends_on:
-      - db
       - redis
 
   celery-beat:
@@ -99,11 +73,7 @@ services:
       SECRET_KEY: django-insecure-change-this-in-production-very-long-random-string-here
       DEBUG: "True"
       DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,192.168.1.5,0.0.0.0"
-      DB_NAME: health_surveillance
-      DB_USER: postgres
-      DB_PASSWORD: password
-      DB_HOST: db
-      DB_PORT: "5432"
+      SPATIALITE_LIBRARY_PATH: mod_spatialite
       REDIS_URL: redis://redis:6379/0
       EMAIL_HOST: smtp.gmail.com
       EMAIL_PORT: "587"
@@ -113,7 +83,6 @@ services:
       TWILIO_AUTH_TOKEN: 6ea6b18f18c43747b6630ea334d81c13
       TWILIO_PHONE_NUMBER: "+16812026553"
     depends_on:
-      - db
       - redis
 
   nginx:
@@ -129,7 +98,6 @@ services:
       - web
 
 volumes:
-  postgres_data:
   redis_data:
   static_volume:
   media_volume:

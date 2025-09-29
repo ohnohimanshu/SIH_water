@@ -12,13 +12,11 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        postgresql-client \
-        postgresql-client-common \
-        libpq-dev \
         gcc \
         gdal-bin \
         libgdal-dev \
         python3-gdal \
+        libsqlite3-mod-spatialite \
         gettext \
         curl \
     && rm -rf /var/lib/apt/lists/*

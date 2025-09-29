@@ -7,13 +7,12 @@ from pathlib import Path
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(_file_).resolve().parent.parent
 
 # Environment variables
 env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, 'django-insecure-change-this-in-production'),
-    DATABASE_URL=(str, 'postgresql://user:password@localhost:5432/health_surveillance'),
     REDIS_URL=(str, 'redis://localhost:6379/0'),
 )
 
@@ -99,23 +98,17 @@ WSGI_APPLICATION = 'health_surveillance.wsgi.application'
 ASGI_APPLICATION = 'health_surveillance.asgi.application'
 
 # Database
-# Prefer DATABASE_URL when provided (e.g., on Railway). Falls back to local settings.
-default_db = env.db('DATABASE_URL', default=None)
-if default_db:
-    # Ensure PostGIS engine for GIS features
-    default_db['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
-    DATABASES = {'default': default_db}
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': env('DB_NAME', default='health_surveillance'),
-            'USER': env('DB_USER', default='postgres'),
-            'PASSWORD': env('DB_PASSWORD', default='password'),
-            'HOST': env('DB_HOST', default='db'),
-            'PORT': env('DB_PORT', default='5432'),
-        }
+# Use SpatiaLite (SQLite with spatial extensions) to support GIS fields locally.
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+        'NAME': str(BASE_DIR / 'db.sqlite3'),
     }
+}
+
+# Path to the SpatiaLite library. On many Linux systems this is 'mod_spatialite'.
+# You may need to adjust based on your environment (e.g., 'mod_spatialite.so').
+SPATIALITE_LIBRARY_PATH = env('SPATIALITE_LIBRARY_PATH', default='mod_spatialite')
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
