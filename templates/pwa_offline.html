@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Offline - Cloudburst Alert System{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto text-center py-20">
+    <div class="mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 100-10 7 7 0 10-13 6z" />
+        </svg>
+    </div>
+    <h1 class="text-2xl font-bold mb-2">You're offline</h1>
+    <p class="text-base-content/70">Some features may be unavailable. We'll reconnect automatically when your network is back.</p>
+    <div class="mt-6">
+        <a href="/" class="btn btn-primary">Try Again</a>
+    </div>
+    <p class="text-xs mt-6 text-base-content/60">Cached content will continue to work where available.</p>
+</div>
+{% endblock %}
+

@@ -1,0 +1,523 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard • Smart Health Surveillance{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-8" data-aos="fade-down">
+    <!-- Header -->
+    <div class="hero bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl p-8">
+        <div class="hero-content text-center">
+            <div class="max-w-4xl">
+                <h1 class="text-4xl font-bold mb-4" data-aos="fade-up" data-aos-delay="200">
+                    📊 Health Surveillance Dashboard
+                </h1>
+                <p class="text-lg opacity-90" data-aos="fade-up" data-aos-delay="400">
+                    Real-time monitoring and analytics for waterborne disease surveillance
+                </p>
+                <div class="mt-4 flex justify-center space-x-4" data-aos="fade-up" data-aos-delay="600">
+                    <div class="badge badge-lg badge-outline">
+                        <i data-lucide="activity" class="w-4 h-4 mr-2"></i>
+                        Live Updates
+                    </div>
+                    <div class="badge badge-lg badge-outline">
+                        <i data-lucide="cpu" class="w-4 h-4 mr-2"></i>
+                        AI Analytics
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="stat bg-base-100 shadow-xl rounded-2xl">
+            <div class="stat-figure text-error">
+                <i data-lucide="virus" class="w-8 h-8"></i>
+            </div>
+            <div class="stat-title">Active Outbreaks</div>
+            <div class="stat-value text-error" id="outbreak-count">0</div>
+            <div class="stat-desc">Currently monitored</div>
+        </div>
+        
+        <div class="stat bg-base-100 shadow-xl rounded-2xl">
+            <div class="stat-figure text-info">
+                <i data-lucide="droplets" class="w-8 h-8"></i>
+            </div>
+            <div class="stat-title">Water Tests</div>
+            <div class="stat-value text-info" id="water-tests">0</div>
+            <div class="stat-desc">Completed today</div>
+        </div>
+        
+        <div class="stat bg-base-100 shadow-xl rounded-2xl">
+            <div class="stat-figure text-success">
+                <i data-lucide="file-text" class="w-8 h-8"></i>
+            </div>
+            <div class="stat-title">Health Reports</div>
+            <div class="stat-value text-success" id="health-reports">0</div>
+            <div class="stat-desc">Submitted today</div>
+        </div>
+        
+        <div class="stat bg-base-100 shadow-xl rounded-2xl">
+            <div class="stat-figure text-warning">
+                <i data-lucide="bell" class="w-8 h-8"></i>
+            </div>
+            <div class="stat-title">Active Alerts</div>
+            <div class="stat-value text-warning" id="active-alerts">0</div>
+            <div class="stat-desc">Requiring attention</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-aos="fade-up" data-aos-delay="400">
+        <a href="{% url 'data_collection' %}" class="btn btn-primary btn-lg">
+            <i data-lucide="clipboard-list" class="w-5 h-5 mr-2"></i>
+            Collect Data
+        </a>
+        <a href="{% url 'disease_map' %}" class="btn btn-secondary btn-lg">
+            <i data-lucide="map" class="w-5 h-5 mr-2"></i>
+            View Map
+        </a>
+        <button class="btn btn-accent btn-lg" onclick="refreshData()">
+            <i data-lucide="refresh-cw" class="w-5 h-5 mr-2"></i>
+            Refresh
+        </button>
+        <button class="btn btn-warning btn-lg" onclick="sendTestAlert()">
+            <i data-lucide="bell" class="w-5 h-5 mr-2"></i>
+            Test Alert
+        </button>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" data-aos="fade-up" data-aos-delay="600">
+        <!-- Disease Cases Chart -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-lucide="trending-up" class="w-5 h-5"></i>
+                    Disease Cases Over Time
+                </h2>
+                <div class="h-80">
+                    <canvas id="diseaseChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Water Quality Chart -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-lucide="droplets" class="w-5 h-5"></i>
+                    Water Quality Status
+                </h2>
+                <div class="h-80">
+                    <canvas id="waterChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ML Outbreak Prediction (Next 7 Days) -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-lucide="brain" class="w-5 h-5"></i>
+                    ML Outbreak Prediction (Next 7 Days)
+                </h2>
+                <div class="h-80">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+                <p class="text-xs text-base-content/60 mt-2">Values represent predicted outbreak probability (0-1). Demo model based on recent trend.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Assessment and Alerts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" data-aos="fade-up" data-aos-delay="800">
+        <!-- Risk Assessment -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    Risk Assessment
+                </h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="font-medium">Low Risk Areas</span>
+                        </div>
+                        <span class="text-2xl font-bold text-green-600" id="low-risk-count">0</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="font-medium">Medium Risk Areas</span>
+                        </div>
+                        <span class="text-2xl font-bold text-yellow-600" id="medium-risk-count">0</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                            <span class="font-medium">High Risk Areas</span>
+                        </div>
+                        <span class="text-2xl font-bold text-orange-600" id="high-risk-count">0</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <span class="font-medium">Critical Risk Areas</span>
+                        </div>
+                        <span class="text-2xl font-bold text-red-600" id="critical-risk-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Alerts -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    Recent Alerts
+                </h2>
+                <div class="space-y-4" id="alerts-list">
+                    <div class="flex items-center space-x-4 p-4 bg-base-200 rounded-lg">
+                        <div class="loading loading-spinner loading-sm"></div>
+                        <span>Loading alerts...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="card bg-base-100 shadow-xl" data-aos="fade-up" data-aos-delay="1000">
+        <div class="card-body">
+            <h2 class="card-title mb-6">
+                <i data-lucide="activity" class="w-5 h-5"></i>
+                System Status
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="radial-progress text-success" style="--value:85;" role="progressbar">
+                        <span class="text-sm font-bold">85%</span>
+                    </div>
+                    <p class="mt-2 text-sm text-base-content/70">System Health</p>
+                </div>
+                <div class="text-center">
+                    <div class="radial-progress text-info" style="--value:92;" role="progressbar">
+                        <span class="text-sm font-bold">92%</span>
+                    </div>
+                    <p class="mt-2 text-sm text-base-content/70">Data Accuracy</p>
+                </div>
+                <div class="text-center">
+                    <div class="radial-progress text-warning" style="--value:78;" role="progressbar">
+                        <span class="text-sm font-bold">78%</span>
+                    </div>
+                    <p class="mt-2 text-sm text-base-content/70">ML Model Performance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Global variables
+let diseaseChart, waterChart, predictionChart;
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    loadDashboardData();
+    setInterval(loadDashboardData, 30000); // Refresh every 30 seconds
+});
+
+// Initialize charts
+function initializeCharts() {
+    // Disease Cases Chart
+    const diseaseCtx = document.getElementById('diseaseChart').getContext('2d');
+    diseaseChart = new Chart(diseaseCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+            datasets: [{
+                label: 'Disease Cases',
+                data: [12, 19, 3, 5, 2, 3, 8, 15],
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Water Quality Chart
+    const waterCtx = document.getElementById('waterChart').getContext('2d');
+    waterChart = new Chart(waterCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Safe', 'Moderate Risk', 'High Risk', 'Unsafe'],
+            datasets: [{
+                data: [65, 20, 10, 5],
+                backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+
+    // ML Prediction Chart
+    const predictionCtx = document.getElementById('predictionChart').getContext('2d');
+    const { labels: predLabels, data: predData } = generatePredictionData();
+    predictionChart = new Chart(predictionCtx, {
+        type: 'line',
+        data: {
+            labels: predLabels,
+            datasets: [{
+                label: 'Predicted Outbreak Probability',
+                data: predData,
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                tension: 0.35,
+                fill: true,
+                pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 1,
+                    ticks: { callback: (v) => v.toFixed(1) },
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                },
+                x: { grid: { color: 'rgba(0,0,0,0.1)' } }
+            }
+        }
+    });
+}
+
+// Load dashboard data
+async function loadDashboardData() {
+    try {
+        const stats = await fetchStats();
+        const alerts = await fetchAlerts();
+        
+        updateStats(stats);
+        updateAlerts(alerts);
+        updateRiskAssessment(stats);
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+    }
+}
+
+// Generate simple 7-day prediction using last disease trend values (demo)
+function generatePredictionData() {
+    const labels = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() + i + 1);
+        return d.toLocaleDateString(undefined, { weekday: 'short' });
+    });
+
+    // Use existing diseaseChart baseline if available; otherwise create a gentle curve
+    const baseline = diseaseChart?.data?.datasets?.[0]?.data || [12, 19, 3, 5, 2, 3, 8, 15];
+    const lastVals = baseline.slice(-4);
+    const avg = lastVals.reduce((a, b) => a + b, 0) / lastVals.length || 5;
+    const trend = (lastVals[lastVals.length - 1] - lastVals[0]) / Math.max(1, lastVals.length - 1);
+
+    const data = labels.map((_, i) => {
+        // Simple trend + noise mapped into 0..1 probability
+        const val = avg + trend * (i + 1);
+        const prob = Math.max(0, Math.min(1, (val / (avg * 3 || 1))));
+        return Number(prob.toFixed(2));
+    });
+
+    return { labels, data };
+}
+
+// Fetch statistics (mock data)
+async function fetchStats() {
+    return {
+        outbreaks: Math.floor(Math.random() * 10),
+        waterTests: Math.floor(Math.random() * 100) + 50,
+        healthReports: Math.floor(Math.random() * 200) + 100,
+        alerts: Math.floor(Math.random() * 5),
+        lowRisk: Math.floor(Math.random() * 20) + 10,
+        mediumRisk: Math.floor(Math.random() * 15) + 5,
+        highRisk: Math.floor(Math.random() * 10) + 2,
+        criticalRisk: Math.floor(Math.random() * 5)
+    };
+}
+
+// Fetch alerts (mock data)
+async function fetchAlerts() {
+    return [
+        {
+            type: 'outbreak',
+            title: 'Outbreak Detected',
+            message: 'High number of diarrhea cases reported in Village A',
+            time: '2 hours ago',
+            severity: 'high'
+        },
+        {
+            type: 'water',
+            title: 'Water Contamination',
+            message: 'E.coli levels exceeded safe limits in Water Source B',
+            time: '4 hours ago',
+            severity: 'warning'
+        },
+        {
+            type: 'health',
+            title: 'Health Report Submitted',
+            message: 'Daily health report submitted by ASHA Worker',
+            time: '6 hours ago',
+            severity: 'info'
+        }
+    ];
+}
+
+// Update statistics
+function updateStats(stats) {
+    document.getElementById('outbreak-count').textContent = stats.outbreaks;
+    document.getElementById('water-tests').textContent = stats.waterTests;
+    document.getElementById('health-reports').textContent = stats.healthReports;
+    document.getElementById('active-alerts').textContent = stats.alerts;
+}
+
+// Update risk assessment
+function updateRiskAssessment(stats) {
+    document.getElementById('low-risk-count').textContent = stats.lowRisk;
+    document.getElementById('medium-risk-count').textContent = stats.mediumRisk;
+    document.getElementById('high-risk-count').textContent = stats.highRisk;
+    document.getElementById('critical-risk-count').textContent = stats.criticalRisk;
+}
+
+// Update alerts
+function updateAlerts(alerts) {
+    const alertsList = document.getElementById('alerts-list');
+    alertsList.innerHTML = '';
+
+    alerts.forEach(alert => {
+        const alertItem = document.createElement('div');
+        alertItem.className = `flex items-center space-x-4 p-4 bg-base-200 rounded-lg hover:bg-base-300 transition-colors`;
+        
+        const icon = getAlertIcon(alert.type);
+        const severityClass = getSeverityClass(alert.severity);
+        
+        alertItem.innerHTML = `
+            <div class="${severityClass}">
+                <i data-lucide="${icon}" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="font-medium text-base-content">${alert.title}</h4>
+                <p class="text-sm text-base-content/70">${alert.message}</p>
+            </div>
+            <div class="text-xs text-base-content/50">
+                ${alert.time}
+            </div>
+        `;
+        
+        alertsList.appendChild(alertItem);
+    });
+
+    // Re-initialize Lucide icons
+    lucide.createIcons();
+}
+
+// Get alert icon based on type
+function getAlertIcon(type) {
+    const icons = {
+        outbreak: 'virus',
+        water: 'droplets',
+        health: 'heart',
+        system: 'settings'
+    };
+    return icons[type] || 'bell';
+}
+
+// Get severity class
+function getSeverityClass(severity) {
+    const classes = {
+        high: 'text-error',
+        warning: 'text-warning',
+        info: 'text-info',
+        success: 'text-success'
+    };
+    return classes[severity] || 'text-info';
+}
+
+// Refresh data
+function refreshData() {
+    const refreshBtn = event.target;
+    const originalText = refreshBtn.innerHTML;
+    
+    refreshBtn.innerHTML = '<i data-lucide="refresh-cw" class="w-5 h-5 mr-2 animate-spin"></i>Refreshing...';
+    refreshBtn.disabled = true;
+    
+    loadDashboardData().finally(() => {
+        refreshBtn.innerHTML = originalText;
+        refreshBtn.disabled = false;
+    });
+}
+
+// Send test alert
+async function sendTestAlert() {
+    const testBtn = event.target;
+    const originalText = testBtn.innerHTML;
+    
+    testBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i>Sending...';
+    testBtn.disabled = true;
+    
+    try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        alert('Test alert sent successfully!');
+    } catch (error) {
+        console.error('Error sending test alert:', error);
+        alert('Error sending test alert. Please try again.');
+    } finally {
+        testBtn.innerHTML = originalText;
+        testBtn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

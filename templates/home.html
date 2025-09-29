@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+
+{% block title %}Home • Smart Health Surveillance{% endblock %}
+
+{% block page_title %}Home{% endblock %}
+
+{% block content %}
+<div class="space-y-8" data-aos="fade-down">
+    <!-- Hero Section -->
+    <div class="hero bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-2xl p-8">
+        <div class="hero-content text-center">
+            <div class="max-w-4xl">
+                <h1 class="text-5xl font-bold mb-6" data-aos="fade-up" data-aos-delay="200">
+                    🏥 Smart Health Surveillance System
+                </h1>
+                <p class="text-xl opacity-90 mb-8" data-aos="fade-up" data-aos-delay="400">
+                    Real-time monitoring and early warning system for waterborne diseases in Northeastern Region, India
+                </p>
+                <div class="flex justify-center space-x-4 flex-wrap gap-4" data-aos="fade-up" data-aos-delay="600">
+                    <div class="badge badge-lg badge-outline">
+                        <i data-lucide="activity" class="w-4 h-4 mr-2"></i>
+                        Live Data
+                    </div>
+                    <div class="badge badge-lg badge-outline">
+                        <i data-lucide="shield-check" class="w-4 h-4 mr-2"></i>
+                        AI-Powered
+                    </div>
+                    <div class="badge badge-lg badge-outline">
+                        <i data-lucide="map" class="w-4 h-4 mr-2"></i>
+                        Real-time Mapping
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="stat bg-base-100 shadow-xl rounded-2xl">
+            <div class="stat-figure text-primary">
+                <i data-lucide="virus" class="w-8 h-8"></i>
+            </div>
+            <div class="stat-title">Active Outbreaks</div>
+            <div class="stat-value text-primary" id="outbreak-count">0</div>
+            <div class="stat-desc">Currently monitored</div>
+        </div>
+        
+        <div class="stat bg-base-100 shadow-xl rounded-2xl">
+            <div class="stat-figure text-secondary">
+                <i data-lucide="droplets" class="w-8 h-8"></i>
+            </div>
+            <div class="stat-title">Water Sources</div>
+            <div class="stat-value text-secondary" id="water-sources">0</div>
+            <div class="stat-desc">Being monitored</div>
+        </div>
+        
+        <div class="stat bg-base-100 shadow-xl rounded-2xl">
+            <div class="stat-figure text-accent">
+                <i data-lucide="users" class="w-8 h-8"></i>
+            </div>
+            <div class="stat-title">ASHA Workers</div>
+            <div class="stat-value text-accent" id="asha-workers">0</div>
+            <div class="stat-desc">Active contributors</div>
+        </div>
+        
+        <div class="stat bg-base-100 shadow-xl rounded-2xl">
+            <div class="stat-figure text-success">
+                <i data-lucide="check-circle" class="w-8 h-8"></i>
+            </div>
+            <div class="stat-title">Safe Areas</div>
+            <div class="stat-value text-success" id="safe-areas">0</div>
+            <div class="stat-desc">Low risk zones</div>
+        </div>
+    </div>
+
+    <!-- Main Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-aos="fade-up" data-aos-delay="400">
+        <!-- Dashboard Card -->
+        <div class="card bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500 card-hover">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="card-title text-blue-900">
+                            <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                            Dashboard
+                        </h3>
+                        <p class="text-blue-700">Real-time monitoring and analytics</p>
+                    </div>
+                    <div class="text-blue-500">
+                        <i data-lucide="trending-up" class="w-8 h-8"></i>
+                    </div>
+                </div>
+                <div class="card-actions justify-end">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-sm">
+                        View Dashboard
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Collection Card -->
+        <div class="card bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500 card-hover">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="card-title text-green-900">
+                            <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+                            Data Collection
+                        </h3>
+                        <p class="text-green-700">Submit health reports and patient data</p>
+                    </div>
+                    <div class="text-green-500">
+                        <i data-lucide="file-text" class="w-8 h-8"></i>
+                    </div>
+                </div>
+                <div class="card-actions justify-end">
+                    <a href="{% url 'data_collection' %}" class="btn btn-success btn-sm">
+                        Collect Data
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disease Map Card -->
+        <div class="card bg-gradient-to-br from-orange-50 to-orange-100 border-l-4 border-orange-500 card-hover">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="card-title text-orange-900">
+                            <i data-lucide="map" class="w-6 h-6"></i>
+                            Disease Map
+                        </h3>
+                        <p class="text-orange-700">Interactive disease hotspot mapping</p>
+                    </div>
+                    <div class="text-orange-500">
+                        <i data-lucide="map-pin" class="w-8 h-8"></i>
+                    </div>
+                </div>
+                <div class="card-actions justify-end">
+                    <a href="{% url 'disease_map' %}" class="btn btn-warning btn-sm">
+                        View Map
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Water Quality Card -->
+        <div class="card bg-gradient-to-br from-cyan-50 to-cyan-100 border-l-4 border-cyan-500 card-hover">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="card-title text-cyan-900">
+                            <i data-lucide="droplets" class="w-6 h-6"></i>
+                            Water Quality
+                        </h3>
+                        <p class="text-cyan-700">Monitor water sources and quality tests</p>
+                    </div>
+                    <div class="text-cyan-500">
+                        <i data-lucide="test-tube" class="w-8 h-8"></i>
+                    </div>
+                </div>
+                <div class="card-actions justify-end">
+                    <a href="{% url 'water_quality' %}" class="btn btn-info btn-sm">
+                        Check Quality
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Card -->
+        <div class="card bg-gradient-to-br from-red-50 to-red-100 border-l-4 border-red-500 card-hover">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="card-title text-red-900">
+                            <i data-lucide="bell" class="w-6 h-6"></i>
+                            Smart Alerts
+                        </h3>
+                        <p class="text-red-700">Real-time notifications and warnings</p>
+                    </div>
+                    <div class="text-red-500">
+                        <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                    </div>
+                </div>
+                <div class="card-actions justify-end">
+                    <button class="btn btn-error btn-sm" onclick="showAlerts()">
+                        View Alerts
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card bg-base-100 shadow-xl" data-aos="fade-up" data-aos-delay="600">
+        <div class="card-body">
+            <h2 class="card-title mb-6">
+                <i data-lucide="activity" class="w-6 h-6"></i>
+                Recent Activity
+            </h2>
+            <div class="space-y-4" id="recent-activity">
+                <div class="flex items-center space-x-4 p-4 bg-base-200 rounded-lg">
+                    <div class="loading loading-spinner loading-sm"></div>
+                    <span>Loading recent activity...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" data-aos="fade-up" data-aos-delay="800">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h3 class="card-title">
+                    <i data-lucide="info" class="w-5 h-5"></i>
+                    System Information
+                </h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-base-content/70">Version:</span>
+                        <span class="font-medium">{{ system_info.version }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-base-content/70">Status:</span>
+                        <span class="badge badge-success">{{ system_info.status }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-base-content/70">Last Updated:</span>
+                        <span class="font-medium">Just now</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load dashboard data
+async function loadDashboardData() {
+    try {
+        // Simulate API calls (replace with actual API endpoints)
+        const stats = await fetchStats();
+        updateStats(stats);
+        loadRecentActivity();
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+    }
+}
+
+// Fetch statistics (mock data)
+async function fetchStats() {
+    // In a real application, this would be an API call
+    return {
+        outbreaks: Math.floor(Math.random() * 10),
+        waterSources: Math.floor(Math.random() * 100) + 50,
+        ashaWorkers: Math.floor(Math.random() * 200) + 100,
+        safeAreas: Math.floor(Math.random() * 50) + 20
+    };
+}
+
+// Update statistics
+function updateStats(stats) {
+    document.getElementById('outbreak-count').textContent = stats.outbreaks;
+    document.getElementById('water-sources').textContent = stats.waterSources;
+    document.getElementById('asha-workers').textContent = stats.ashaWorkers;
+    document.getElementById('safe-areas').textContent = stats.safeAreas;
+}
+
+// Load recent activity
+function loadRecentActivity() {
+    const activities = [
+        {
+            icon: 'file-text',
+            title: 'Health Report Submitted',
+            description: 'Daily health report from ASHA Worker in Village A',
+            time: '2 minutes ago',
+            color: 'text-success'
+        },
+        {
+            icon: 'droplets',
+            title: 'Water Quality Test Completed',
+            description: 'E.coli levels within safe limits at Water Source B',
+            time: '15 minutes ago',
+            color: 'text-info'
+        },
+        {
+            icon: 'map-pin',
+            title: 'New Location Added',
+            description: 'Water source monitoring started in Village C',
+            time: '1 hour ago',
+            color: 'text-warning'
+        },
+        {
+            icon: 'bell',
+            title: 'Alert Resolved',
+            description: 'High risk warning cleared for District D',
+            time: '2 hours ago',
+            color: 'text-success'
+        }
+    ];
+
+    const activityContainer = document.getElementById('recent-activity');
+    activityContainer.innerHTML = '';
+
+    activities.forEach(activity => {
+        const activityElement = document.createElement('div');
+        activityElement.className = 'flex items-center space-x-4 p-4 bg-base-200 rounded-lg hover:bg-base-300 transition-colors';
+        activityElement.innerHTML = `
+            <div class="${activity.color}">
+                <i data-lucide="${activity.icon}" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="font-medium text-base-content">${activity.title}</h4>
+                <p class="text-sm text-base-content/70">${activity.description}</p>
+            </div>
+            <div class="text-xs text-base-content/50">
+                ${activity.time}
+            </div>
+        `;
+        activityContainer.appendChild(activityElement);
+    });
+
+    // Re-initialize Lucide icons
+    lucide.createIcons();
+}
+
+// Show alerts modal
+function showAlerts() {
+    // This would open a modal with recent alerts
+    alert('Alerts feature coming soon!');
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+    setInterval(loadDashboardData, 30000); // Refresh every 30 seconds
+});
+</script>
+{% endblock %}

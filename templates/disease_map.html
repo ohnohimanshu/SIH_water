@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+
+{% block title %}Disease Hotspot Map • Smart Health Surveillance{% endblock %}
+
+{% block page_title %}Disease Hotspot Map{% endblock %}
+
+{% block head %}
+<style>
+  .map-container {
+    height: 70vh;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .map-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 250px;
+  }
+  
+  .risk-legend {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+  }
+  
+  .location-popup {
+    min-width: 200px;
+  }
+  
+  .popup-header {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #1f2937;
+  }
+  
+  .popup-content {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  .risk-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .risk-green { background-color: #dcfce7; color: #166534; }
+  .risk-yellow { background-color: #fef3c7; color: #92400e; }
+  .risk-orange { background-color: #fed7aa; color: #c2410c; }
+  .risk-red { background-color: #fecaca; color: #dc2626; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6" x-data="mapData()">
+  <!-- Header -->
+  <div class="hero bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-2xl p-8" data-aos="fade-down">
+    <div class="hero-content text-center">
+      <div class="max-w-2xl">
+        <h1 class="text-4xl font-bold mb-4" data-aos="fade-up" data-aos-delay="200">
+          🗺️ Disease Hotspot Map
+        </h1>
+        <p class="text-lg opacity-90" data-aos="fade-up" data-aos-delay="400">
+          Real-time visualization of water-borne disease risks and health surveillance data
+        </p>
+        <div class="mt-4 flex justify-center space-x-4" data-aos="fade-up" data-aos-delay="600">
+          <div class="badge badge-lg badge-outline">
+            <i data-lucide="activity" class="w-4 h-4 mr-2"></i>
+            Live Data
+          </div>
+          <div class="badge badge-lg badge-outline">
+            <i data-lucide="shield-check" class="w-4 h-4 mr-2"></i>
+            AI-Powered
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Container -->
+  <div class="card bg-base-100 shadow-xl" data-aos="fade-up" data-aos-delay="200">
+    <div class="card-body p-0">
+      <div class="relative">
+        <!-- Map Controls -->
+        <div class="map-controls">
+          <h3 class="font-bold text-lg mb-4">Map Controls</h3>
+          
+          <!-- Layer Toggle -->
+          <div class="form-control mb-4">
+            <label class="label">
+              <span class="label-text font-medium">Display Layer</span>
+            </label>
+            <select class="select select-bordered w-full" x-model="selectedLayer" @change="updateMapLayer()">
+              <option value="heatmap">Disease Risk Heatmap</option>
+              <option value="markers">Individual Locations</option>
+              <option value="both">Both Layers</option>
+            </select>
+          </div>
+          
+          <!-- Risk Filter -->
+          <div class="form-control mb-4">
+            <label class="label">
+              <span class="label-text font-medium">Risk Level Filter</span>
+            </label>
+            <div class="space-y-2">
+              <label class="flex items-center">
+                <input type="checkbox" class="checkbox checkbox-sm" x-model="filters.green" @change="updateMapLayer()">
+                <span class="ml-2 text-sm">Green (Safe)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" class="checkbox checkbox-sm" x-model="filters.yellow" @change="updateMapLayer()">
+                <span class="ml-2 text-sm">Yellow (Caution)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" class="checkbox checkbox-sm" x-model="filters.orange" @change="updateMapLayer()">
+                <span class="ml-2 text-sm">Orange (Warning)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" class="checkbox checkbox-sm" x-model="filters.red" @change="updateMapLayer()">
+                <span class="ml-2 text-sm">Red (Critical)</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Refresh Button -->
+          <button class="btn btn-primary w-full" @click="refreshMapData()">
+            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+            Refresh Data
+          </button>
+        </div>
+        
+        <!-- Risk Legend -->
+        <div class="risk-legend">
+          <h3 class="font-bold text-lg mb-3">Risk Levels</h3>
+          <div class="legend-item">
+            <div class="legend-color bg-green-500"></div>
+            <span class="text-sm">Green - Low Risk (0-0.2)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color bg-yellow-500"></div>
+            <span class="text-sm">Yellow - Moderate Risk (0.2-0.4)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color bg-orange-500"></div>
+            <span class="text-sm">Orange - High Risk (0.4-0.7)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color bg-red-500"></div>
+            <span class="text-sm">Red - Critical Risk (0.7-1.0)</span>
+          </div>
+        </div>
+        
+        <!-- Map -->
+        <div id="map" class="map-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Statistics -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6" data-aos="fade-up" data-aos-delay="400">
+    <div class="card bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500">
+      <div class="card-body">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-blue-600">Total Locations</p>
+            <p class="text-2xl font-bold text-blue-900" x-text="stats.totalLocations">0</p>
+          </div>
+          <i data-lucide="map-pin" class="w-8 h-8 text-blue-500"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card bg-gradient-to-br from-orange-50 to-red-100 border-l-4 border-orange-500">
+      <div class="card-body">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-orange-600">High Risk Areas</p>
+            <p class="text-2xl font-bold text-orange-900" x-text="stats.highRiskAreas">0</p>
+          </div>
+          <i data-lucide="alert-triangle" class="w-8 h-8 text-orange-500"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500">
+      <div class="card-body">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-green-600">Safe Areas</p>
+            <p class="text-2xl font-bold text-green-900" x-text="stats.safeAreas">0</p>
+          </div>
+          <i data-lucide="shield-check" class="w-8 h-8 text-green-500"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Alerts -->
+  <div class="card bg-base-100 shadow-xl" data-aos="fade-up" data-aos-delay="600">
+    <div class="card-body">
+      <h2 class="card-title mb-6">
+        <i data-lucide="bell" class="w-6 h-6"></i>
+        Recent Map Alerts
+      </h2>
+      <div class="space-y-4" id="map-alerts">
+        <div class="flex items-center space-x-4 p-4 bg-base-200 rounded-lg">
+          <div class="loading loading-spinner loading-sm"></div>
+          <span>Loading alerts...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function mapData() {
+  return {
+    map: null,
+    heatmapLayer: null,
+    markersLayer: null,
+    selectedLayer: 'heatmap',
+    filters: {
+      green: true,
+      yellow: true,
+      orange: true,
+      red: true
+    },
+    stats: {
+      totalLocations: 0,
+      highRiskAreas: 0,
+      safeAreas: 0
+    },
+    mapData: [],
+    
+    init() {
+      this.initMap();
+      this.loadMapData();
+    },
+    
+    initMap() {
+      // Initialize map centered on Northeastern India
+      this.map = L.map('map').setView([26.0, 93.0], 7);
+      
+      // Add tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(this.map);
+      
+      // Initialize layers
+      this.heatmapLayer = L.layerGroup().addTo(this.map);
+      this.markersLayer = L.layerGroup().addTo(this.map);
+    },
+    
+    async loadMapData() {
+      try {
+        // Generate mock data for demonstration
+        this.mapData = this.generateMockData();
+        this.updateStats();
+        this.updateMapLayer();
+        this.loadMapAlerts();
+      } catch (error) {
+        console.error('Error loading map data:', error);
+        this.showToast('Error loading map data', 'error');
+      }
+    },
+    
+    generateMockData() {
+      const data = [];
+      const locations = [
+        { name: 'Guwahati', lat: 26.1445, lng: 91.7362 },
+        { name: 'Shillong', lat: 25.5788, lng: 91.8933 },
+        { name: 'Imphal', lat: 24.8170, lng: 93.9368 },
+        { name: 'Aizawl', lat: 23.7271, lng: 92.7176 },
+        { name: 'Kohima', lat: 25.6751, lng: 94.1106 },
+        { name: 'Agartala', lat: 23.8315, lng: 91.2862 },
+        { name: 'Itanagar', lat: 27.0844, lng: 93.6053 },
+        { name: 'Dibrugarh', lat: 27.4728, lng: 95.0020 },
+        { name: 'Silchar', lat: 24.8167, lng: 92.8000 },
+        { name: 'Tezpur', lat: 26.6333, lng: 92.8000 }
+      ];
+      
+      locations.forEach((location, index) => {
+        const riskLevel = Math.random();
+        let level, intensity;
+        
+        if (riskLevel < 0.2) {
+          level = 'Green';
+          intensity = riskLevel;
+        } else if (riskLevel < 0.4) {
+          level = 'Yellow';
+          intensity = riskLevel;
+        } else if (riskLevel < 0.7) {
+          level = 'Orange';
+          intensity = riskLevel;
+        } else {
+          level = 'Red';
+          intensity = riskLevel;
+        }
+        
+        data.push({
+          lat: location.lat + (Math.random() - 0.5) * 0.1,
+          lng: location.lng + (Math.random() - 0.5) * 0.1,
+          intensity: intensity,
+          meta: {
+            name: location.name,
+            code: `LOC${index + 1}`,
+            level: level,
+            new_cases: Math.floor(Math.random() * 20),
+            pH: Math.random() * 3 + 6,
+            turbidity: Math.random() * 10,
+            chlorine: Math.random() * 2
+          }
+        });
+      });
+      
+      return data;
+    },
+    
+    updateStats() {
+      this.stats.totalLocations = this.mapData.length;
+      this.stats.highRiskAreas = this.mapData.filter(point => 
+        point.meta.level === 'Orange' || point.meta.level === 'Red'
+      ).length;
+      this.stats.safeAreas = this.mapData.filter(point => 
+        point.meta.level === 'Green'
+      ).length;
+    },
+    
+    updateMapLayer() {
+      // Clear existing layers
+      this.heatmapLayer.clearLayers();
+      this.markersLayer.clearLayers();
+      
+      // Filter data based on risk level filters
+      const filteredData = this.mapData.filter(point => {
+        const level = point.meta.level.toLowerCase();
+        return this.filters[level];
+      });
+      
+      if (this.selectedLayer === 'heatmap' || this.selectedLayer === 'both') {
+        this.addHeatmapLayer(filteredData);
+      }
+      
+      if (this.selectedLayer === 'markers' || this.selectedLayer === 'both') {
+        this.addMarkersLayer(filteredData);
+      }
+    },
+    
+    addHeatmapLayer(data) {
+      if (data.length === 0) return;
+      
+      // Convert data to heatmap format
+      const heatmapData = data.map(point => [
+        point.lat,
+        point.lng,
+        point.intensity
+      ]);
+      
+      // Add heatmap layer
+      const heatmap = L.heatLayer(heatmapData, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 17,
+        gradient: {
+          0.0: 'green',
+          0.3: 'yellow',
+          0.6: 'orange',
+          1.0: 'red'
+        }
+      });
+      
+      this.heatmapLayer.addLayer(heatmap);
+    },
+    
+    addMarkersLayer(data) {
+      data.forEach(point => {
+        const marker = L.circleMarker([point.lat, point.lng], {
+          radius: 8,
+          fillColor: this.getRiskColor(point.meta.level),
+          color: '#fff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        });
+        
+        // Add popup
+        const popupContent = this.createPopupContent(point);
+        marker.bindPopup(popupContent);
+        
+        this.markersLayer.addLayer(marker);
+      });
+    },
+    
+    getRiskColor(level) {
+      const colors = {
+        'Green': '#10b981',
+        'Yellow': '#f59e0b',
+        'Orange': '#f97316',
+        'Red': '#ef4444'
+      };
+      return colors[level] || '#6b7280';
+    },
+    
+    createPopupContent(point) {
+      const meta = point.meta;
+      return `
+        <div class="location-popup">
+          <div class="popup-header">${meta.name} (${meta.code})</div>
+          <div class="popup-content">
+            <div class="mb-2">
+              <span class="risk-badge risk-${meta.level.toLowerCase()}">${meta.level}</span>
+            </div>
+            <div class="space-y-1">
+              <div><strong>New Cases:</strong> ${meta.new_cases || 0}</div>
+              <div><strong>pH:</strong> ${meta.pH ? meta.pH.toFixed(2) : 'N/A'}</div>
+              <div><strong>Turbidity:</strong> ${meta.turbidity ? meta.turbidity.toFixed(2) : 'N/A'} NTU</div>
+              <div><strong>Chlorine:</strong> ${meta.chlorine ? meta.chlorine.toFixed(2) : 'N/A'} mg/L</div>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+    
+    async refreshMapData() {
+      this.showToast('Refreshing map data...', 'info');
+      await this.loadMapData();
+      this.showToast('Map data refreshed!', 'success');
+    },
+    
+    loadMapAlerts() {
+      const alerts = [
+        {
+          icon: 'alert-triangle',
+          title: 'High Risk Alert',
+          description: 'Critical risk detected in Guwahati area',
+          time: '5 minutes ago',
+          color: 'text-error'
+        },
+        {
+          icon: 'droplets',
+          title: 'Water Quality Warning',
+          description: 'E.coli levels exceeded in Shillong water source',
+          time: '1 hour ago',
+          color: 'text-warning'
+        },
+        {
+          icon: 'shield-check',
+          title: 'Risk Cleared',
+          description: 'Low risk status restored in Imphal',
+          time: '2 hours ago',
+          color: 'text-success'
+        }
+      ];
+
+      const alertsContainer = document.getElementById('map-alerts');
+      alertsContainer.innerHTML = '';
+
+      alerts.forEach(alert => {
+        const alertElement = document.createElement('div');
+        alertElement.className = 'flex items-center space-x-4 p-4 bg-base-200 rounded-lg hover:bg-base-300 transition-colors';
+        alertElement.innerHTML = `
+          <div class="${alert.color}">
+            <i data-lucide="${alert.icon}" class="w-5 h-5"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-medium text-base-content">${alert.title}</h4>
+            <p class="text-sm text-base-content/70">${alert.description}</p>
+          </div>
+          <div class="text-xs text-base-content/50">
+            ${alert.time}
+          </div>
+        `;
+        alertsContainer.appendChild(alertElement);
+      });
+
+      // Re-initialize Lucide icons
+      lucide.createIcons();
+    },
+    
+    showToast(message, type = 'info') {
+      // Simple toast notification
+      const toast = document.createElement('div');
+      toast.className = `alert alert-${type} fixed top-4 right-4 z-50 shadow-lg`;
+      toast.innerHTML = `
+        <div>
+          <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info'}" class="w-5 h-5"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+  }
+}
+</script>
+{% endblock %}

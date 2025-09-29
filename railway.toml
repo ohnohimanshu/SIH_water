@@ -1,0 +1,26 @@
+[project]
+name = "smart-health-surveillance"
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[service]
+name = "web"
+startCommand = "gunicorn health_surveillance.wsgi:application --bind 0.0.0.0:${PORT} --workers 3"
+envVars = [
+  { key = "DJANGO_SETTINGS_MODULE", value = "health_surveillance.settings" },
+  { key = "PORT", value = "8000" },
+  { key = "PYTHONUNBUFFERED", value = "1" },
+]
+
+[variables]
+# Expect DATABASE_URL from Railway Postgres plugin
+# SECRET_KEY should be set in Railway environment variables
+# DEBUG=false in production
+
+

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Water Quality Prediction • Smart Health Surveillance{% endblock %}
+
+{% block page_title %}Water Quality Prediction{% endblock %}
+
+{% block content %}
+<div class="space-y-8" data-aos="fade-down">
+    <!-- Header -->
+    <div class="hero bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-2xl p-8">
+        <div class="hero-content text-center">
+            <div class="max-w-4xl">
+                <h1 class="text-4xl font-bold mb-4" data-aos="fade-up" data-aos-delay="200">
+                    🔍 Water Quality Prediction
+                </h1>
+                <p class="text-lg opacity-90" data-aos="fade-up" data-aos-delay="400">
+                    See if the water quality is safe and the likely water-borne disease risk based on your submitted data
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prediction Result Card -->
+    <div class="card bg-base-100 shadow-xl" data-aos="fade-up" data-aos-delay="200">
+        <div class="card-body p-8">
+            {% if prediction_result %}
+                <h2 class="card-title text-2xl mb-6">Prediction Result</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Water Safety -->
+                    <div class="p-4 rounded-xl border border-base-300">
+                        <div class="text-sm text-base-content/70 mb-1">Water Safety</div>
+                        {% if prediction_result.water_safe is not None %}
+                            {% if prediction_result.water_safe %}
+                              <div class="text-2xl font-bold text-green-600">Safe</div>
+                            {% else %}
+                              <div class="text-2xl font-bold text-red-600">Not Safe</div>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-2xl font-bold text-base-content/70">N/A</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Predicted Disease Type -->
+                    <div class="p-4 rounded-xl border border-base-300">
+                        <div class="text-sm text-base-content/70 mb-1">Likely Disease Type</div>
+                        {% if prediction_result.predicted_disease_type %}
+                          <div class="text-2xl font-bold">{{ prediction_result.predicted_disease_type }}</div>
+                        {% else %}
+                          <div class="text-2xl font-bold text-base-content/70">N/A</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Outbreak Risk -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    <div class="p-4 rounded-xl border border-base-300">
+                        <div class="text-sm text-base-content/70 mb-1">Outbreak Probability</div>
+                        <div class="text-2xl font-bold">{{ prediction_result.outbreak_probability|floatformat:3 }}</div>
+                    </div>
+                    <div class="p-4 rounded-xl border border-base-300">
+                        <div class="text-sm text-base-content/70 mb-1">Risk Level</div>
+                        <div class="text-2xl font-bold">{{ prediction_result.risk_level }}</div>
+                    </div>
+                    <div class="p-4 rounded-xl border border-base-300">
+                        <div class="text-sm text-base-content/70 mb-1">Model Confidence</div>
+                        <div class="text-2xl font-bold">{{ prediction_result.confidence|floatformat:3 }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <a href="{% url 'data_collection' %}" class="btn btn-outline">
+                        <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+                        Back to Data Collection
+                    </a>
+                </div>
+            {% else %}
+                <h2 class="card-title text-2xl mb-4">No Prediction Yet</h2>
+                <p class="text-base-content/70 mb-4">Submit water quality data to see prediction results here.</p>
+                <a href="{% url 'data_collection' %}" class="btn btn-primary">
+                    <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+                    Go to Data Collection
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}

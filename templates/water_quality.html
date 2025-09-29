@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+
+{% block title %}Water Quality • Smart Health Surveillance{% endblock %}
+{% block page_title %}Water Quality{% endblock %}
+
+{% block head %}
+<style>
+  /* Keep page lean; rely on base theme */
+  .water-sources{max-height:400px;overflow-y:auto}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f3f3f3 0%, #f9fcfb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2d3436;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .header p {
+            color: #636e72;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.safe { border-left: 4px solid #00b894; }
+        .stat-card.moderate { border-left: 4px solid #fdcb6e; }
+        .stat-card.high { border-left: 4px solid #e17055; }
+        .stat-card.unsafe { border-left: 4px solid #e84393; }
+
+        .stat-card i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .stat-card.safe i { color: #00b894; }
+        .stat-card.moderate i { color: #fdcb6e; }
+        .stat-card.high i { color: #e17055; }
+        .stat-card.unsafe i { color: #e84393; }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #636e72;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .card h3 i {
+            margin-right: 10px;
+        }
+
+        .test-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: grid;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: #2d3436;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00b894;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .water-sources {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .water-source-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #00b894;
+        }
+
+        .water-source-item.contaminated {
+            border-left-color: #e17055;
+            background: #fff5f5;
+        }
+
+        .source-info h4 {
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+
+        .source-info p {
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+
+        .source-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-safe {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-moderate {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-unsafe {
+            background: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alerts-section {
+            grid-column: 1 / -1;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #fff3cd;
+            border-radius: 10px;
+            border-left: 4px solid #fdcb6e;
+        }
+
+        .alert-item.critical {
+            background: #f8d7da;
+            border-left-color: #e17055;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            color: #fdcb6e;
+        }
+
+        .alert-item.critical .alert-icon {
+            color: #e17055;
+        }
+
+        .alert-content h4 {
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+
+        .alert-content p {
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8" data-aos="fade-down">
+        <!-- Header -->
+        <div class="hero bg-base-100 text-base-content rounded-2xl p-8 shadow">
+            <div class="hero-content text-center">
+                <div class="max-w-4xl">
+                    <h1 class="text-4xl font-bold mb-4">
+                        💧 Water Quality Monitoring
+                    </h1>
+                    <p class="text-lg opacity-70">Real-time monitoring and testing of water sources</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="stat bg-base-100 shadow-xl rounded-2xl">
+                <div class="stat-figure text-success">
+                    <i data-lucide="check-circle" class="w-8 h-8"></i>
+                </div>
+                <div class="stat-title">Safe Sources</div>
+                <div class="stat-value text-success" id="safe-sources">0</div>
+                <div class="stat-desc">Within limits</div>
+            </div>
+            <div class="stat bg-base-100 shadow-xl rounded-2xl">
+                <div class="stat-figure text-warning">
+                    <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                </div>
+                <div class="stat-title">Moderate Risk</div>
+                <div class="stat-value text-warning" id="moderate-sources">0</div>
+                <div class="stat-desc">Monitor regularly</div>
+            </div>
+            <div class="stat bg-base-100 shadow-xl rounded-2xl">
+                <div class="stat-figure text-orange-500">
+                    <i data-lucide="alert-octagon" class="w-8 h-8"></i>
+                </div>
+                <div class="stat-title">High Risk</div>
+                <div class="stat-value text-orange-500" id="high-sources">0</div>
+                <div class="stat-desc">Action needed</div>
+            </div>
+            <div class="stat bg-base-100 shadow-xl rounded-2xl">
+                <div class="stat-figure text-error">
+                    <i data-lucide="x-circle" class="w-8 h-8"></i>
+                </div>
+                <div class="stat-title">Unsafe</div>
+                <div class="stat-value text-error" id="unsafe-sources">0</div>
+                <div class="stat-desc">Critical</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Water Quality Test Form -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                <h3 class="card-title"><i data-lucide="flask-conical" class="w-5 h-5"></i> Water Quality Test</h3>
+                <form id="water-test-form" class="test-form">
+                    <div class="form-group">
+                        <label for="water-source">Water Source</label>
+                        <select id="water-source" name="water_source" class="select select-bordered w-full" required>
+                            <option value="">Select Water Source</option>
+                            <option value="source1">Village A - Tube Well 1</option>
+                            <option value="source2">Village B - Hand Pump 2</option>
+                            <option value="source3">Village C - Well 3</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ph-level">pH Level</label>
+                            <input type="number" id="ph-level" name="ph_level" class="input input-bordered w-full" min="0" max="14" step="0.1" placeholder="7.0">
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">Temperature (°C)</label>
+                            <input type="number" id="temperature" name="temperature" class="input input-bordered w-full" min="0" max="50" step="0.1" placeholder="25.0">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="turbidity">Turbidity (NTU)</label>
+                            <input type="number" id="turbidity" name="turbidity" class="input input-bordered w-full" min="0" step="0.1" placeholder="1.0">
+                        </div>
+                        <div class="form-group">
+                            <label for="tds">Total Dissolved Solids (mg/L)</label>
+                            <input type="number" id="tds" name="tds" class="input input-bordered w-full" min="0" step="1" placeholder="500">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ecoli">E.coli Count (per 100ml)</label>
+                            <input type="number" id="ecoli" name="ecoli" class="input input-bordered w-full" min="0" step="1" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="coliform">Total Coliform (per 100ml)</label>
+                            <input type="number" id="coliform" name="coliform" class="input input-bordered w-full" min="0" step="1" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="test-notes">Test Notes</label>
+                        <textarea id="test-notes" name="test_notes" class="textarea textarea-bordered w-full" rows="3" placeholder="Additional observations..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i data-lucide="send" class="w-4 h-4 mr-2"></i> Submit Test Results
+                    </button>
+                </form>
+                </div>
+            </div>
+
+            <!-- Water Sources Status -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                <h3 class="card-title"><i data-lucide="list" class="w-5 h-5"></i> Water Sources Status</h3>
+                <div class="water-sources space-y-2" id="water-sources-list">
+                    <div class="loading loading-spinner loading-sm"></div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+            <h3 class="card-title"><i data-lucide="bell" class="w-5 h-5"></i> Water Quality Alerts</h3>
+            <div id="alerts-list" class="space-y-2">
+                <div class="alert alert-warning">
+                    <i data-lucide="alert-triangle"></i>
+                    <div>
+                        <h4 class="font-medium">High E.coli Levels Detected</h4>
+                        <p class="text-sm opacity-80">Village A - Tube Well 1: E.coli count exceeds safe limits (150/100ml)</p>
+                    </div>
+                </div>
+                <div class="alert alert-error">
+                    <i data-lucide="x-circle"></i>
+                    <div>
+                        <h4 class="font-medium">Critical Water Contamination</h4>
+                        <p class="text-sm opacity-80">Village C - Well 3: Multiple contaminants detected, immediate action required</p>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadWaterSources();
+            loadStatistics();
+            setInterval(loadWaterSources, 30000); // Refresh every 30 seconds
+            setInterval(loadStatistics, 60000); // Refresh statistics every minute
+        });
+
+        // Load water sources
+        async function loadWaterSources() {
+            try {
+                // Simulate API call (replace with actual API endpoint)
+                const sources = await fetchWaterSources();
+                updateWaterSourcesList(sources);
+            } catch (error) {
+                console.error('Error loading water sources:', error);
+            }
+        }
+
+        // Fetch water sources (mock data)
+        async function fetchWaterSources() {
+            // In a real application, this would be an API call
+            return [
+                {
+                    id: 1,
+                    name: 'Village A - Tube Well 1',
+                    status: 'safe',
+                    lastTest: '2 hours ago',
+                    ph: 7.2,
+                    ecoli: 5
+                },
+                {
+                    id: 2,
+                    name: 'Village B - Hand Pump 2',
+                    status: 'moderate',
+                    lastTest: '4 hours ago',
+                    ph: 6.8,
+                    ecoli: 25
+                },
+                {
+                    id: 3,
+                    name: 'Village C - Well 3',
+                    status: 'unsafe',
+                    lastTest: '1 hour ago',
+                    ph: 5.9,
+                    ecoli: 150
+                }
+            ];
+        }
+
+        // Update water sources list
+        function updateWaterSourcesList(sources) {
+            const list = document.getElementById('water-sources-list');
+            list.innerHTML = '';
+
+            sources.forEach(source => {
+                const item = document.createElement('div');
+                item.className = `water-source-item ${source.status === 'unsafe' ? 'contaminated' : ''}`;
+                
+                const statusClass = `status-${source.status}`;
+                const statusText = source.status.charAt(0).toUpperCase() + source.status.slice(1);
+                
+                item.innerHTML = `
+                    <div class="source-info">
+                        <h4>${source.name}</h4>
+                        <p>Last test: ${source.lastTest} | pH: ${source.ph} | E.coli: ${source.ecoli}/100ml</p>
+                    </div>
+                    <div class="source-status ${statusClass}">${statusText}</div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                const stats = await fetchStatistics();
+                updateStatistics(stats);
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // Fetch statistics (mock data)
+        async function fetchStatistics() {
+            return {
+                safe: Math.floor(Math.random() * 20) + 10,
+                moderate: Math.floor(Math.random() * 10) + 5,
+                high: Math.floor(Math.random() * 5) + 2,
+                unsafe: Math.floor(Math.random() * 3) + 1
+            };
+        }
+
+        // Update statistics
+        function updateStatistics(stats) {
+            document.getElementById('safe-sources').textContent = stats.safe;
+            document.getElementById('moderate-sources').textContent = stats.moderate;
+            document.getElementById('high-sources').textContent = stats.high;
+            document.getElementById('unsafe-sources').textContent = stats.unsafe;
+        }
+
+        // Handle form submission
+        document.getElementById('water-test-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Submitting...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Collect form data
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                
+                // Simulate API call (replace with actual API endpoint)
+                const response = await fetch('/api/water-quality-tests/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Water quality test submitted successfully!');
+                    this.reset();
+                    loadWaterSources(); // Refresh the list
+                } else {
+                    throw new Error('Failed to submit test');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Error submitting test. Please try again.');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+</script>
+{% endblock %}

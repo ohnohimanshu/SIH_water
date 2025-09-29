@@ -1,0 +1,79 @@
+# Django and Core Dependencies
+Django==4.2.7
+django-environ==0.11.2
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-extensions==3.2.3
+
+# Database
+psycopg2-binary==2.9.9
+
+# Authentication & Security
+djangorestframework-simplejwt==5.3.0
+django-oauth-toolkit==1.7.1
+cryptography==41.0.7
+
+# Real-time Features
+channels==4.0.0
+channels-redis==4.1.0
+redis==5.0.1
+django-redis==5.4.0
+
+# AI/ML Libraries
+scikit-learn==1.3.2
+xgboost==2.0.2
+pandas==2.1.4
+numpy==1.25.2
+tensorflow==2.15.0
+
+# Background Tasks
+celery==5.3.4
+django-celery-beat==2.5.0
+django-celery-results==2.5.1
+
+# Image Processing
+Pillow==10.1.0
+opencv-python==4.8.1.78
+
+# API Documentation
+drf-spectacular==0.26.5
+
+# Monitoring & Logging
+sentry-sdk==1.38.0
+django-debug-toolbar==4.2.0
+
+# File Storage
+boto3==1.34.0
+django-storages==1.14.2
+
+# Progressive Web App
+django-pwa==2.0.1
+
+# SMS/WhatsApp Integration
+twilio==8.10.0
+requests==2.31.0
+
+# Geospatial
+geopy==2.4.1
+folium==0.15.0
+
+# Development Tools
+pytest==7.4.3
+pytest-django==4.7.0
+factory-boy==3.3.0
+coverage==7.3.2
+black==23.11.0
+flake8==6.1.0
+
+# Production Server
+gunicorn==21.2.0
+
+# SMS/WhatsApp
+twilio==8.10.0
+
+# Machine Learning
+scikit-learn==1.3.2
+joblib==1.3.2
+
+# Static files in production
+whitenoise==6.7.0

@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}Data Collection • Smart Health Surveillance{% endblock %}
+
+{% block page_title %}Data Collection{% endblock %}
+
+{% block content %}
+<div class="space-y-8" data-aos="fade-down">
+    <!-- Header -->
+    <div class="hero bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-2xl p-8">
+        <div class="hero-content text-center">
+            <div class="max-w-4xl">
+                <h1 class="text-4xl font-bold mb-4" data-aos="fade-up" data-aos-delay="200">
+                    📝 Data Collection & Prediction
+                </h1>
+                <p class="text-lg opacity-90" data-aos="fade-up" data-aos-delay="400">
+                    Enter water quality and environmental data to predict outbreak risk
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Collection Form (submits to prediction) -->
+    <div class="card bg-base-100 shadow-xl" data-aos="fade-up" data-aos-delay="200">
+        <div class="card-body p-8">
+            <form class="space-y-6" method="post" action="{% url 'prediction' %}">
+                {% csrf_token %}
+                
+                <!-- Section: Basic Information -->
+                <div class="divider font-semibold text-lg flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                    Location Details
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-control">
+                        <label class="label" for="location">
+                            <span class="label-text font-medium">Location <span class="text-xs text-gray-400" title="Village, town, or area name">?</span></span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="location"
+                            id="location"
+                            placeholder="e.g. Guwahati Urban"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+                    <div class="form-control">
+                        <label class="label" for="district">
+                            <span class="label-text font-medium">District</span>
+                        </label>
+                        <select class="select select-bordered w-full" name="district" id="district" required>
+                            <option value="">Select District</option>
+                            <option value="Assam">Assam</option>
+                            <option value="Manipur">Manipur</option>
+                            <option value="Meghalaya">Meghalaya</option>
+                            <option value="Mizoram">Mizoram</option>
+                            <option value="Nagaland">Nagaland</option>
+                            <option value="Tripura">Tripura</option>
+                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-control mt-4">
+                    <label class="label" for="date">
+                        <span class="label-text font-medium">Report Date</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        name="date"
+                        id="date"
+                        class="input input-bordered w-full"
+                        value="{{ now|date:'Y-m-d' }}"
+                        required
+                    >
+                </div>
+
+                <!-- Water Quality Parameters -->
+                <div class="divider font-semibold text-lg flex items-center gap-2">
+                    <i data-lucide="droplets" class="w-5 h-5"></i>
+                    Water Quality Parameters
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="form-control">
+                        <label class="label" for="water_ph">
+                            <span class="label-text font-medium">pH Level <span class="text-xs text-gray-400" title="Normal: 6.5 - 8.5">?</span></span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="water_ph"
+                            id="water_ph"
+                            step="0.1" 
+                            min="0" 
+                            max="14"
+                            placeholder="7.0"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label" for="turbidity_ntu">
+                            <span class="label-text font-medium">Turbidity (NTU)</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="turbidity_ntu"
+                            id="turbidity_ntu"
+                            step="0.1" 
+                            min="0"
+                            placeholder="0.0"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label" for="ecoli_count_per_100ml">
+                            <span class="label-text font-medium">E.coli Count (per 100ml)</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="ecoli_count_per_100ml"
+                            id="ecoli_count_per_100ml"
+                            step="0.1" 
+                            min="0"
+                            placeholder="0.0"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="form-control">
+                        <label class="label" for="total_coliform_count">
+                            <span class="label-text font-medium">Total Coliform Count</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="total_coliform_count"
+                            id="total_coliform_count"
+                            step="0.1" 
+                            min="0"
+                            placeholder="0.0"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label" for="water_source_type">
+                            <span class="label-text font-medium">Water Source Type</span>
+                        </label>
+                        <select class="select select-bordered w-full" name="water_source_type" id="water_source_type" required>
+                            <option value="">Select Water Source</option>
+                            <option value="Piped Supply">Piped Supply</option>
+                            <option value="Bore Well">Bore Well</option>
+                            <option value="Surface Water">Surface Water</option>
+                            <option value="River/Stream">River/Stream</option>
+                            <option value="Hand Pump">Hand Pump</option>
+                            <option value="Tank">Tank</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label" for="distance_to_healthcare_km">
+                            <span class="label-text font-medium">Distance to Healthcare (km)</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="distance_to_healthcare_km"
+                            id="distance_to_healthcare_km"
+                            step="0.1" 
+                            min="0"
+                            placeholder="5.0"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Environmental Factors -->
+                <div class="divider font-semibold text-lg flex items-center gap-2">
+                    <i data-lucide="cloud-rain" class="w-5 h-5"></i>
+                    Environmental & Demographic Factors
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="form-control">
+                        <label class="label" for="temperature_celsius">
+                            <span class="label-text font-medium">Temperature (°C)</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="temperature_celsius"
+                            id="temperature_celsius"
+                            step="0.1" 
+                            min="-50" 
+                            max="60"
+                            placeholder="25.0"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label" for="rainfall_mm_last_7days">
+                            <span class="label-text font-medium">Rainfall (mm, last 7 days)</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="rainfall_mm_last_7days"
+                            id="rainfall_mm_last_7days"
+                            step="0.1" 
+                            min="0"
+                            placeholder="0.0"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label" for="population_density">
+                            <span class="label-text font-medium">Population Density (per sq km)</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="population_density"
+                            id="population_density"
+                            step="0.1" 
+                            min="0"
+                            placeholder="150.0"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="form-control">
+                        <label class="label" for="sanitation_score">
+                            <span class="label-text font-medium">Sanitation Score (0-5)</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="sanitation_score"
+                            id="sanitation_score"
+                            step="0.1" 
+                            min="0" 
+                            max="5"
+                            placeholder="3.0"
+                            class="input input-bordered w-full"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label" for="month">
+                            <span class="label-text font-medium">Month</span>
+                        </label>
+                        <select class="select select-bordered w-full" name="month" id="month" required>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6" selected>June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Flags</span>
+                        </label>
+                        <div class="flex items-center gap-6">
+                            <label class="label cursor-pointer">
+                                <input type="checkbox" class="checkbox" name="previous_outbreak_history" value="Yes">
+                                <span class="label-text ml-2">Previous Outbreak</span>
+                            </label>
+                            <label class="label cursor-pointer">
+                                <input type="checkbox" class="checkbox" name="is_monsoon_season" value="Yes">
+                                <span class="label-text ml-2">Monsoon Season</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outbreak Prediction Section -->
+                <div class="divider font-semibold text-lg flex items-center gap-2">
+                    <i data-lucide="activity" class="w-5 h-5"></i>
+                    Outbreak Prediction
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="form-control">
+                        <label class="label" for="outbreak_occurred">
+                            <span class="label-text font-medium">Outbreak Occurred <span class="text-xs text-gray-400" title="Has an outbreak occurred recently?">?</span></span>
+                        </label>
+                        <select class="select select-bordered w-full" name="outbreak_occurred" id="outbreak_occurred">
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label" for="outbreak_probability">
+                            <span class="label-text font-medium">Outbreak Probability (%) <span class="text-xs text-gray-400" title="Predicted probability of outbreak">?</span></span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="outbreak_probability"
+                            id="outbreak_probability"
+                            min="0" max="100" step="0.1"
+                            placeholder="e.g. 75.5"
+                            class="input input-bordered w-full"
+                        >
+                    </div>
+                    <div class="form-control">
+                        <label class="label" for="severity_level">
+                            <span class="label-text font-medium">Severity Level <span class="text-xs text-gray-400" title="Predicted severity of outbreak">?</span></span>
+                        </label>
+                        <select class="select select-bordered w-full" name="severity_level" id="severity_level">
+                            <option value="">Select Severity</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label" for="age_group_affected">
+                            <span class="label-text font-medium">Age Group Affected <span class="text-xs text-gray-400" title="Which age group is most affected?">?</span></span>
+                        </label>
+                        <select class="select select-bordered w-full" name="age_group_affected" id="age_group_affected">
+                            <option value="">Select Age Group</option>
+                            <option value="Children">Children</option>
+                            <option value="Adults">Adults</option>
+                            <option value="Elderly">Elderly</option>
+                            <option value="All">All</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Submit Button Row -->
+                <div class="flex flex-col md:flex-row justify-end gap-4 mt-8">
+                    <a href="{% url 'prediction' %}" class="btn btn-outline">
+                        <i data-lucide="arrow-right" class="w-4 h-4 mr-2"></i>
+                        Go to Prediction Page
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i data-lucide="send" class="w-4 h-4 mr-2"></i>
+                        Predict Outbreak Risk
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="card bg-base-100 shadow-xl" data-aos="fade-up" data-aos-delay="400">
+        <div class="card-body">
+            <h2 class="card-title mb-2">
+                <i data-lucide="info" class="w-5 h-5"></i>
+                How this works
+            </h2>
+            <p class="text-sm text-base-content/70">
+                The form fields mirror the dataset columns used to train the prediction model. When you submit, the data is sent to the Prediction endpoint where the ML model estimates outbreak probability and risk level. You can also open the Prediction page directly to experiment interactively.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}

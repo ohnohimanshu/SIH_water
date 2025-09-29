@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Profile • Smart Health Surveillance{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="space-y-8" data-aos="fade-down">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="flex items-center space-x-4">
+        <div class="avatar">
+          <div class="w-16 rounded-full bg-primary text-primary-content flex items-center justify-center text-xl font-bold">
+            {{ user.username|first|upper }}
+          </div>
+        </div>
+        <div class="flex-1">
+          <h2 class="card-title">{{ user.get_full_name|default:user.username }}</h2>
+          <p class="text-base-content/70">{{ user.email }}</p>
+          {% if user.profile and user.profile.phone %}
+          <p class="text-base-content/70">{{ user.profile.phone }}</p>
+          {% endif %}
+        </div>
+        <a href="{% url 'logout' %}" class="btn btn-error btn-sm">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h3 class="card-title"><i data-lucide="shield" class="w-5 h-5"></i> Account</h3>
+        <div class="space-y-2">
+          <div class="flex justify-between"><span class="text-base-content/70">Username</span><span>{{ user.username }}</span></div>
+          <div class="flex justify-between"><span class="text-base-content/70">Role</span><span>{{ user.role|default:"User" }}</span></div>
+          <div class="flex justify-between"><span class="text-base-content/70">Joined</span><span>{{ user.date_joined|date:"M d, Y" }}</span></div>
+          <div class="flex justify-between"><span class="text-base-content/70">Last login</span><span>{{ user.last_login|date:"M d, Y H:i" }}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h3 class="card-title"><i data-lucide="settings" class="w-5 h-5"></i> Quick Actions</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <a href="{% url 'dashboard' %}" class="btn btn-primary btn-outline">Dashboard</a>
+          <a href="{% url 'data_collection' %}" class="btn btn-secondary btn-outline">Collect Data</a>
+          <a href="{% url 'disease_map' %}" class="btn btn-accent btn-outline">Disease Map</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up • Smart Health Surveillance{% endblock %}
+
+{% block page_title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Header -->
+        <div class="text-center" data-aos="fade-down">
+            <div class="mx-auto h-16 w-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="user-plus" class="w-8 h-8 text-white"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-base-content">Create Account</h2>
+            <p class="mt-2 text-sm text-base-content/70">
+                Join the Smart Health Surveillance System
+            </p>
+        </div>
+
+        <!-- Sign Up Form -->
+        <div class="card bg-base-100 shadow-xl" data-aos="fade-up" data-aos-delay="200">
+            <div class="card-body p-8">
+                <form method="post" class="space-y-6" x-data="signupForm()">
+                    {% csrf_token %}
+                    
+                    <!-- Name Fields -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-medium">First Name</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                name="first_name" 
+                                placeholder="First name"
+                                class="input input-bordered w-full"
+                                x-model="form.first_name"
+                                @input="validateField('first_name')"
+                            >
+                            <div x-show="errors.first_name" class="text-error text-sm mt-1" x-text="errors.first_name"></div>
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-medium">Last Name</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                name="last_name" 
+                                placeholder="Last name"
+                                class="input input-bordered w-full"
+                                x-model="form.last_name"
+                                @input="validateField('last_name')"
+                            >
+                            <div x-show="errors.last_name" class="text-error text-sm mt-1" x-text="errors.last_name"></div>
+                        </div>
+                    </div>
+
+                    <!-- Username Field -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Username</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                name="username" 
+                                placeholder="Choose a username"
+                                class="input input-bordered w-full pl-10"
+                                required
+                                x-model="form.username"
+                                @input="validateField('username')"
+                            >
+                            <i data-lucide="user" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
+                        </div>
+                        <div x-show="errors.username" class="text-error text-sm mt-1" x-text="errors.username"></div>
+                    </div>
+
+                    <!-- Email Field -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Email</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="email" 
+                                name="email" 
+                                placeholder="Enter your email"
+                                class="input input-bordered w-full pl-10"
+                                required
+                                x-model="form.email"
+                                @input="validateField('email')"
+                            >
+                            <i data-lucide="mail" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
+                        </div>
+                        <div x-show="errors.email" class="text-error text-sm mt-1" x-text="errors.email"></div>
+                    </div>
+
+                    <!-- Password Fields -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Password</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                :type="showPassword ? 'text' : 'password'"
+                                name="password1" 
+                                placeholder="Create a password"
+                                class="input input-bordered w-full pl-10 pr-10"
+                                required
+                                x-model="form.password1"
+                                @input="validateField('password1')"
+                            >
+                            <i data-lucide="lock" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
+                            <button 
+                                type="button" 
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2"
+                                @click="showPassword = !showPassword"
+                            >
+                                <i :data-lucide="showPassword ? 'eye-off' : 'eye'" class="w-4 h-4 text-base-content/50"></i>
+                            </button>
+                        </div>
+                        <div x-show="errors.password1" class="text-error text-sm mt-1" x-text="errors.password1"></div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Confirm Password</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                :type="showPassword ? 'text' : 'password'"
+                                name="password2" 
+                                placeholder="Confirm your password"
+                                class="input input-bordered w-full pl-10"
+                                required
+                                x-model="form.password2"
+                                @input="validateField('password2')"
+                            >
+                            <i data-lucide="lock" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
+                        </div>
+                        <div x-show="errors.password2" class="text-error text-sm mt-1" x-text="errors.password2"></div>
+                    </div>
+
+                    <!-- Password Strength Indicator -->
+                    <div x-show="form.password1" class="space-y-2">
+                        <div class="text-sm text-base-content/70">Password strength:</div>
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                            <div 
+                                class="h-2 rounded-full transition-all duration-300"
+                                :class="passwordStrength.color"
+                                :style="`width: ${passwordStrength.width}%`"
+                            ></div>
+                        </div>
+                        <div class="text-sm" :class="passwordStrength.color.replace('bg-', 'text-')" x-text="passwordStrength.text"></div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="form-control">
+                        <label class="label cursor-pointer">
+                            <input type="checkbox" class="checkbox checkbox-sm" required>
+                            <span class="label-text ml-2">
+                                I agree to the 
+                                <a href="#" class="link link-primary">Terms of Service</a> 
+                                and 
+                                <a href="#" class="link link-primary">Privacy Policy</a>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        class="btn btn-primary w-full"
+                        :class="{ 'loading': isLoading }"
+                    >
+                        <span x-show="!isLoading">
+                            <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
+                            Create Account
+                        </span>
+                        <span x-show="isLoading">Creating account...</span>
+                    </button>
+                </form>
+
+                <!-- Login Link -->
+                <div class="text-center mt-6">
+                    <p class="text-sm text-base-content/70">
+                        Already have an account? 
+                        <a href="{% url 'login' %}" class="link link-primary font-medium">Sign in here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="text-center" data-aos="fade-up" data-aos-delay="400">
+            <h3 class="text-lg font-semibold mb-4">What you'll get:</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body p-4">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6 text-primary mx-auto mb-2"></i>
+                        <p class="text-sm">Real-time Dashboard</p>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body p-4">
+                        <i data-lucide="map" class="w-6 h-6 text-primary mx-auto mb-2"></i>
+                        <p class="text-sm">Disease Mapping</p>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body p-4">
+                        <i data-lucide="clipboard-list" class="w-6 h-6 text-primary mx-auto mb-2"></i>
+                        <p class="text-sm">Data Collection</p>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body p-4">
+                        <i data-lucide="bell" class="w-6 h-6 text-primary mx-auto mb-2"></i>
+                        <p class="text-sm">Smart Alerts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function signupForm() {
+    return {
+        form: {
+            first_name: '',
+            last_name: '',
+            username: '',
+            email: '',
+            password1: '',
+            password2: ''
+        },
+        errors: {},
+        showPassword: false,
+        isLoading: false,
+        
+        get isFormValid() {
+            return this.form.first_name.length >= 2 &&
+                   this.form.last_name.length >= 2 &&
+                   this.form.username.length >= 3 &&
+                   this.isValidEmail(this.form.email) &&
+                   this.form.password1.length >= 8 &&
+                   this.form.password1 === this.form.password2 &&
+                   Object.keys(this.errors).length === 0;
+        },
+        
+        get passwordStrength() {
+            const password = this.form.password1;
+            if (!password) return { width: 0, color: 'bg-base-200', text: '' };
+            
+            let score = 0;
+            if (password.length >= 8) score += 25;
+            if (/[a-z]/.test(password)) score += 25;
+            if (/[A-Z]/.test(password)) score += 25;
+            if (/[0-9]/.test(password)) score += 25;
+            
+            if (score < 50) {
+                return { width: score, color: 'bg-error', text: 'Weak' };
+            } else if (score < 75) {
+                return { width: score, color: 'bg-warning', text: 'Medium' };
+            } else {
+                return { width: score, color: 'bg-success', text: 'Strong' };
+            }
+        },
+        
+        validateField(field) {
+            this.errors[field] = '';
+            
+            if (field === 'first_name' && this.form.first_name.length < 2) {
+                this.errors.first_name = 'First name must be at least 2 characters';
+            }
+            
+            if (field === 'last_name' && this.form.last_name.length < 2) {
+                this.errors.last_name = 'Last name must be at least 2 characters';
+            }
+            
+            if (field === 'username') {
+                if (this.form.username.length < 3) {
+                    this.errors.username = 'Username must be at least 3 characters';
+                } else if (!/^[a-zA-Z0-9_]+$/.test(this.form.username)) {
+                    this.errors.username = 'Username can only contain letters, numbers, and underscores';
+                }
+            }
+            
+            if (field === 'email' && !this.isValidEmail(this.form.email)) {
+                this.errors.email = 'Please enter a valid email address';
+            }
+            
+            if (field === 'password1' && this.form.password1.length < 8) {
+                this.errors.password1 = 'Password must be at least 8 characters';
+            }
+            
+            if (field === 'password2' && this.form.password1 !== this.form.password2) {
+                this.errors.password2 = 'Passwords do not match';
+            }
+        },
+        
+        isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+    }
+}
+</script>
+{% endblock %}

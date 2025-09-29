@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Login • Smart Health Surveillance{% endblock %}
+
+{% block page_title %}Login{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Header -->
+        <div class="text-center" data-aos="fade-down">
+            <div class="mx-auto h-16 w-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="heart" class="w-8 h-8 text-white"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-base-content">Welcome Back</h2>
+            <p class="mt-2 text-sm text-base-content/70">
+                Sign in to your Smart Health Surveillance account
+            </p>
+        </div>
+
+        <!-- Login Form -->
+        <div class="card bg-base-100 shadow-xl" data-aos="fade-up" data-aos-delay="200">
+            <div class="card-body p-8">
+                <form method="post" class="space-y-6" x-data="loginForm()">
+                    {% csrf_token %}
+                    
+                    <!-- Username Field -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Username</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                name="username" 
+                                placeholder="Enter your username"
+                                class="input input-bordered w-full pl-10"
+                                required
+                                x-model="form.username"
+                                @input="validateField('username')"
+                            >
+                            <i data-lucide="user" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
+                        </div>
+                        <div x-show="errors.username" class="text-error text-sm mt-1" x-text="errors.username"></div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Password</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                :type="showPassword ? 'text' : 'password'"
+                                name="password" 
+                                placeholder="Enter your password"
+                                class="input input-bordered w-full pl-10 pr-10"
+                                required
+                                x-model="form.password"
+                                @input="validateField('password')"
+                            >
+                            <i data-lucide="lock" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
+                            <button 
+                                type="button" 
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2"
+                                @click="showPassword = !showPassword"
+                            >
+                                <i :data-lucide="showPassword ? 'eye-off' : 'eye'" class="w-4 h-4 text-base-content/50"></i>
+                            </button>
+                        </div>
+                        <div x-show="errors.password" class="text-error text-sm mt-1" x-text="errors.password"></div>
+                    </div>
+
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="flex items-center justify-between">
+                        <label class="label cursor-pointer">
+                            <input type="checkbox" class="checkbox checkbox-sm" name="remember_me">
+                            <span class="label-text ml-2">Remember me</span>
+                        </label>
+                        <a href="#" class="link link-primary text-sm">Forgot password?</a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        class="btn btn-primary w-full"
+                        :class="{ 'loading': isLoading }"
+                    >
+                        <span x-show="!isLoading">
+                            <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
+                            Sign In
+                        </span>
+                        <span x-show="isLoading">Signing in...</span>
+                    </button>
+                </form>
+
+                <!-- Divider -->
+                <div class="divider">OR</div>
+
+                <!-- Demo Accounts -->
+                <div class="space-y-3">
+                    <p class="text-sm text-base-content/70 text-center">Try with demo accounts:</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button class="btn btn-outline btn-sm" @click="fillDemoAccount('asha')">
+                            ASHA Worker
+                        </button>
+                        <button class="btn btn-outline btn-sm" @click="fillDemoAccount('district')">
+                            District Officer
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sign Up Link -->
+                <div class="text-center mt-6">
+                    <p class="text-sm text-base-content/70">
+                        Don't have an account? 
+                        <a href="{% url 'signup' %}" class="link link-primary font-medium">Sign up here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function loginForm() {
+    return {
+        form: {
+            username: '',
+            password: ''
+        },
+        errors: {},
+        showPassword: false,
+        isLoading: false,
+        
+        get isFormValid() {
+            return this.form.username.length >= 3 && 
+                   this.form.password.length >= 6 && 
+                   Object.keys(this.errors).length === 0;
+        },
+        
+        validateField(field) {
+            this.errors[field] = '';
+            
+            if (field === 'username') {
+                if (this.form.username.length < 3) {
+                    this.errors.username = 'Username must be at least 3 characters';
+                }
+            }
+            
+            if (field === 'password') {
+                if (this.form.password.length < 6) {
+                    this.errors.password = 'Password must be at least 6 characters';
+                }
+            }
+        },
+        
+        fillDemoAccount(type) {
+            const accounts = {
+                admin: { username: 'admin', password: 'admin123' },
+                asha: { username: 'asha_worker_1', password: 'password123' }
+            };
+            
+            this.form = accounts[type];
+            this.validateField('username');
+            this.validateField('password');
+        }
+    }
+}
+</script>
+{% endblock %}
