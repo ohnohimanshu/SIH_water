@@ -37,6 +37,8 @@ RUN mkdir -p /app/logs /app/media /app/staticfiles
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
+# Apply database migrations
+RUN python manage.py migrate
 
 # Create a non-root user
 RUN adduser --disabled-password --gecos '' appuser
